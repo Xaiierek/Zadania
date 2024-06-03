@@ -1,111 +1,86 @@
-const addPlanBtn = document.getElementById("addPlan");
+let productList = []; // [{ name: "task1", isDone: false }, { name: "task2", isDone: false }];
 
+function onAddHandler() {
+  console.log("onAddClick");
+}
 
-const obArray = [];
+function getInputValue() {
+  const input = document.querySelector("input");
+  return input.value;
+}
 
-addPlanBtn.onclick = function(){
-    const inputLabel = document.querySelector("input");
+function renderProduct(name, checked) {
+  const container = document.getElementById("todoContainer");
 
-    const todocontainer = document.getElementById("todoContainer")
-    const value = inputLabel.value
+  const productContainer = document.createElement("div");
+  productContainer.className = "todolist";
 
-        const productContainer = document.createElement("div");
-        productContainer.className = 'todolist'
+  const todoDiv = document.createElement("div");
+  const trashIcon = document.createElement("i");
+  const checkboxElement = document.createElement("input");
+  checkboxElement.type = "checkbox";
+  checkboxElement.className = "checkboxId";
+  trashIcon.className = "fa-solid fa-trash";
+  todoDiv.className = "todoDiv";
+  todoDiv.innerHTML = name;
 
-        const todoDiv = document.createElement("div")
-        const trashIcon = document.createElement("i")
-        const checkboxId = document.createElement('input')
-        checkboxId.type = "checkbox"
-        checkboxId.className = "checkboxId"
-        trashIcon.className = 'fa-solid fa-trash'
-        todoDiv.className = 'todoDiv';
-        todoDiv.innerHTML = `${value}`;
+  if (checked) {
+    checkboxElement.checked = true;
+    todoDiv.className = todoDiv.className + " done";
+  }
 
-        
-        // localStorage.setItem("productList", obArray)
-        // console.log(localStorage.getItem("productList"))
+  trashIcon.onclick = function () {
+    const filteredProductList = productList.filter(function (product) {
+      return product.name !== name;
+    });
+    productList = filteredProductList;
+    rerender();
+    updateProductListStorage();
+  };
 
-        
-        obArray.push(value)
-        localStorage.setItem("productList", JSON.stringify(obArray))
+  checkboxElement.onclick = function () {
+    productList.forEach(function (product) {
+      if (product.name === name) {
+        product.isDone = !product.isDone; // negation
+      }
+    });
+    rerender();
+    updateProductListStorage();
+  };
 
-        console.log(obArray)
+  container.appendChild(productContainer);
+  productContainer.appendChild(checkboxElement);
+  productContainer.appendChild(todoDiv);
+  todoDiv.appendChild(trashIcon);
+}
 
+function rerender() {
+  document.getElementById("todoContainer").innerHTML = "";
+  productList.forEach(function (product) {
+    renderProduct(product.name, product.isDone);
+  });
+}
 
-        trashIcon.onclick = function(){
-            productContainer.remove();
-        }
+function updateProductListStorage() {
+  localStorage.setItem("productList", JSON.stringify(productList));
+}
 
-        checkboxId.onclick = function(){
-            if(checkboxId.checked){
-                // console.log("check")
-                productContainer.style.background = "gray";
-                todoDiv.style.textDecoration = "line-through";
+function getProductsFromStorage() {
+  const productListJSON = localStorage.getItem("productList");
 
-            }else{
-                // console.log("nope")
-                productContainer.style.background = "white"
-                todoDiv.style.textDecoration = "none";
-            }
-        }
+  return productListJSON ? JSON.parse(productListJSON) : []; // ternary operator
+}
 
-        todocontainer.appendChild(productContainer);
-        productContainer.appendChild(checkboxId);
-        productContainer.appendChild(todoDiv);
-        todoDiv.appendChild(trashIcon);
-       
+const addProductButtonElement = document.getElementById("addPlan");
+addProductButtonElement.addEventListener("click", function () {
+  const name = getInputValue();
+  productList.push({ name: name, isDone: false });
+  rerender();
+  updateProductListStorage();
+});
 
-    }
-
-
-
-window.onload = function(){
-     //console.log(JSON.parse(localStorage.getItem("productList"))) 
-    //const dataJSON = JSON.parse(localStorage.getItem("productList"));
-    const productListJSON = localStorage.getItem("productList");
-    const dataJSON = productListJSON ? JSON.parse(productListJSON) : [];
-
-    for(let i = 0; i < dataJSON.length; i++){
-
-        const task = dataJSON[i];
-
-        const todocontainer = document.getElementById("todoContainer")
-
-        const productContainer = document.createElement("div");
-        productContainer.className = 'todolist'
-
-        const todoDiv = document.createElement("div")
-        const trashIcon = document.createElement("i")
-        const checkboxId = document.createElement('input')
-        checkboxId.type = "checkbox"
-        checkboxId.className = "checkboxId"
-        trashIcon.className = 'fa-solid fa-trash'
-        todoDiv.className = 'todoDiv';
-        todoDiv.innerHTML = task;
-        
-        trashIcon.onclick = function(){
-            //dataJSON.splice(i, 1);
-            dataJSON.pop(i, 1)
-            productContainer.remove();            
-        }
-
-        checkboxId.onclick = function(){
-            if(checkboxId.checked){
-                // console.log("check")
-                productContainer.style.background = "gray";
-                todoDiv.style.textDecoration = "line-through";
-
-            }else{
-                // console.log("nope")
-                productContainer.style.background = "white"
-                todoDiv.style.textDecoration = "none";
-            }
-        }
-
-        todocontainer.appendChild(productContainer);
-        productContainer.appendChild(checkboxId);
-        productContainer.appendChild(todoDiv);
-        todoDiv.appendChild(trashIcon);
-
-    }
+window.onload = function () {
+  const listFromStorage = getProductsFromStorage();
+  productList = listFromStorage;
+  rerender();
 };
