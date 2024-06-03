@@ -1,7 +1,10 @@
 let productList = []; // [{ name: "task1", isDone: false }, { name: "task2", isDone: false }];
 
 function onAddHandler() {
-  console.log("onAddClick");
+  const name = getInputValue();
+  productList.push({ name: name, isDone: false });
+  rerender();
+  updateProductListStorage();
 }
 
 function getInputValue() {
@@ -73,10 +76,7 @@ function getProductsFromStorage() {
 
 const addProductButtonElement = document.getElementById("addPlan");
 addProductButtonElement.addEventListener("click", function () {
-  const name = getInputValue();
-  productList.push({ name: name, isDone: false });
-  rerender();
-  updateProductListStorage();
+  onAddHandler();
 });
 
 window.onload = function () {
